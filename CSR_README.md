@@ -13,6 +13,10 @@ git push origin main
 
 This merges upstream Git history without overwriting the CSR extension. Install dependencies following upstream README. Use Python >=3.9, CUDA, FAISS and pretrained backbone weights as required by HiAD.
 
+## Round 1 experiment protocol
+
+See [design audit and controlled MVTec-2K bottle/capsule protocol](docs/ROUND1_EXPERIMENT_DESIGN.md) before drawing conclusions from experiments. The two missing standardization controls and full-resolution diagnostic export are required for formal mechanism verification.
+
 ## Run controlled experiments
 
 ```bash
