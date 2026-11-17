@@ -13,6 +13,14 @@ git push origin main
 
 This merges upstream Git history without overwriting the CSR extension. Install dependencies following upstream README. Use Python >=3.9, CUDA, FAISS and pretrained backbone weights as required by HiAD.
 
+## Literature and failure-mode audit
+
+- [HLGFA math and implementation boundary](docs/literature/HLGFA_MATH_AND_IMPLEMENTATION.md)
+- [PyramidFlow math and public source audit](docs/literature/PYRAMIDFLOW_MATH_AND_SOURCE.md)
+- [CSR failure analysis and diagnostic extensions](docs/literature/CSR_FAILURE_AUDIT.md)
+
+These are static audits; no new detector or measured results are introduced. Read the failure audit with the Round 1 protocol.
+
 ## Round 1 experiment protocol
 
 See [design audit and controlled MVTec-2K bottle/capsule protocol](docs/ROUND1_EXPERIMENT_DESIGN.md) before drawing conclusions from experiments. The two missing standardization controls and full-resolution diagnostic export are required for formal mechanism verification.
