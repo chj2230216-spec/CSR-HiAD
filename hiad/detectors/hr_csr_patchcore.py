@@ -143,6 +143,10 @@ class HRCSRPatchCore(HRPatchCore):
     def train_step(self, train_dataloader, task_name, checkpoint_path,
                    val_dataloader=None, evaluators=None):
         self.forward_modules.eval()
+        # Upstream defaults to drop_last=True. Keep all normal images in each task.
+        from torch.utils.data import DataLoader
+        train_dataloader = DataLoader(train_dataloader.dataset, batch_size=train_dataloader.batch_size,
+                                      shuffle=False, num_workers=0, drop_last=False)
         if self.csr_mode in CSRTransform.MODES:
             fit = Reservoir(self.csr_fit_rows, self.csr_seed)
             for samples in train_dataloader:

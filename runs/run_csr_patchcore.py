@@ -51,8 +51,8 @@ if __name__ == '__main__':
     parser.add_argument("--seed", default = 42, type = int)
 
     parser.add_argument("--checkpoint_root", default ='results/csr_checkpoints', type = str, help='Directory for saving model checkpoints')
-    parser.add_argument("--log_root", default = 'results/patchcore_logs', type = str, help='Directory for saving logs')
-    parser.add_argument("--vis_root", default = 'results/patchcore_vis', type = str, help='Directory for saving visualization results')
+    parser.add_argument("--log_root", default = 'results/csr_logs', type = str, help='Directory for saving logs')
+    parser.add_argument("--vis_root", default = 'results/csr_vis', type = str, help='Directory for saving visualization results')
 
     parser.add_argument("--gpus", default="0", type=str, help='gpu ids')
 
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     if args.stride != -1 and not 0 < args.stride <= args.patch_size:
         parser.error("invalid stride")
     if args.ds_factors is None:
-        max_k = min(2, int(math.log2(args.image_size // args.patch_size)))
+        max_k = min(1 if args.image_size <= 2048 else 2, int(math.log2(args.image_size // args.patch_size)))
         args.ds_factors = list(range(max_k+1))
     if args.ds_factors != sorted(set(args.ds_factors)) or args.ds_factors[0] != 0:
         parser.error("ds_factors must be sorted unique nonnegative scales starting at zero")
@@ -111,7 +111,15 @@ if __name__ == '__main__':
     os.makedirs(args.log_root, exist_ok=True)
     os.makedirs(args.vis_root, exist_ok=True)
 
-    if not args.evaluation_only:
+    if args.evaluation_only:
+        with open(os.path.join(args.checkpoint_root, 'args.json')) as f:
+            saved = json.load(f)
+        for key in ("image_size","patch_size","stride","ds_factors","fusion_weights",
+                    "mode","assignment","detector_number","embedding_dim","use_thumbnail",
+                    "thumbnail_size","calibration","seed"):
+            if saved.get(key) != getattr(args,key):
+                raise ValueError("evaluation configuration mismatch: " + key)
+    else:
         with open(os.path.join(args.checkpoint_root, 'args.json'), 'w+') as f:
             json.dump(vars(args), f, indent=4)
 
