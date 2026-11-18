@@ -21,6 +21,10 @@ This merges upstream Git history without overwriting the CSR extension. Install 
 
 These are static audits; no new detector or measured results are introduced. Read the failure audit with the Round 1 protocol.
 
+## Shared paired-feature diagnostic (D0)
+
+See [shared 2K diagnostic protocol and commands](docs/ROUND1_SHARED_DIAGNOSTICS.md). The 17-score fixed-row diagnostic is separate from the original Coreset-based Phase A. New CSR runner modes: concat_std, residual_std, direct_csr.
+
 ## Round 1 experiment protocol
 
 See [design audit and controlled MVTec-2K bottle/capsule protocol](docs/ROUND1_EXPERIMENT_DESIGN.md) before drawing conclusions from experiments. The two missing standardization controls and full-resolution diagnostic export are required for formal mechanism verification.

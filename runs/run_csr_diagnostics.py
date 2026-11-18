@@ -145,7 +145,9 @@ class SharedExtractor:
 
 
 def image_score(m):
-    return float(F.avg_pool2d(torch.from_numpy(m)[None,None],16,stride=1).max())
+    # Equivalent valid stride-1 16x16 average pooling, via integral image.
+    a=np.pad(m.astype(np.float64),((1,0),(1,0))).cumsum(0).cumsum(1)
+    return float((a[16:,16:]-a[:-16,16:]-a[16:,:-16]+a[:-16,:-16]).max()/256)
 
 
 def run(args,out):
@@ -160,6 +162,8 @@ def run(args,out):
     n=max(1,min(len(train)-2,round(len(train)*args.holdout_ratio)))
     fit=[train[i] for i in sorted(order[n:])]
     hold=[train[i] for i in sorted(order[:n])]
+    if set(r["sha256"] for r in fit)&set(r["sha256"] for r in hold):
+        raise ValueError("exact duplicate content crosses fit/holdout; group duplicates first")
     cfg=yaml.safe_load(Path(args.config).read_text())
     cfg["target_embed_dimension"]=args.dim
     cfg["faiss_on_gpu"]=False
