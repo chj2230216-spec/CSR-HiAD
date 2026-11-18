@@ -21,6 +21,7 @@ from hiad.task import A2OTaskGenerator, O2OTaskGenerator, NeighborhoodTaskGenera
 from hiad.trainer import HRTrainer
 from hiad.detectors import HRPatchCore
 from hiad.detectors.hr_csr_patchcore import HRCSRPatchCore
+from hiad.csr_model import CSRTransform
 from hiad.csr_calibration import calibrate_tasks
 
 
@@ -56,7 +57,7 @@ if __name__ == '__main__':
 
     parser.add_argument("--gpus", default="0", type=str, help='gpu ids')
 
-    parser.add_argument("--mode", choices=["fine","fused","concat","residual","conditional","csr"], default="csr")
+    parser.add_argument("--mode", choices=["fine","fused", *CSRTransform.MODES], default="csr")
     parser.add_argument("--assignment", choices=["sca","o2o","a2o"], default="sca")
     parser.add_argument("--embedding_dim", type=int, default=384)
     parser.add_argument("--csr_ridge", type=float, default=0.01)

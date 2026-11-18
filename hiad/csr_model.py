@@ -55,7 +55,9 @@ class CSRTransform:
     csr: conditional innovations plus normal-data diagonal standardization.
     No target fine feature enters its predictor.
     """
-    MODES = ("concat", "residual", "conditional", "csr")
+    MODES = ("concat", "residual", "conditional", "csr", "concat_std", "residual_std", "direct_csr")
+    STANDARDIZED = ("csr", "concat_std", "residual_std", "direct_csr")
+    PREDICTED = ("conditional", "csr", "direct_csr")
 
     def __init__(self, mode="csr", ridge=0.01, std_floor=0.01):
         if mode not in self.MODES or ridge <= 0 or std_floor <= 0:
@@ -71,13 +73,14 @@ class CSRTransform:
             raise ValueError("expected >=2 feature rows and >=2 aligned scales")
         self.shape = x.shape[1:]
         self.weights, self.biases = [], []
-        if self.mode in ("conditional", "csr"):
+        if self.mode in self.PREDICTED:
             for k in range(x.shape[1] - 1):
                 c = x[:, k+1]
-                w, b = ridge_fit(c, x[:, k] - c, self.ridge)
+                target = x[:, k] if self.mode == "direct_csr" else x[:, k] - c
+                w, b = ridge_fit(c, target, self.ridge)
                 self.weights.append(w)
                 self.biases.append(b)
-        if self.mode == "csr":
+        if self.mode in self.STANDARDIZED:
             z = self._raw(x)
             self.mean = z.mean(0)
             self.std = np.maximum(z.std(0), self.std_floor)
@@ -86,20 +89,20 @@ class CSRTransform:
     def _raw(self, x):
         if x.ndim != 3 or x.shape[1:] != self.shape:
             raise ValueError("scale count or feature dimension mismatch")
-        if self.mode == "concat":
+        if self.mode in ("concat", "concat_std"):
             return x.reshape(len(x), -1)
         parts = [x[:, -1]]
         for k in range(x.shape[1] - 1):
             c = x[:, k+1]
-            r = x[:, k] - c
-            if self.mode in ("conditional", "csr"):
+            r = x[:, k] if self.mode == "direct_csr" else x[:, k] - c
+            if self.mode in self.PREDICTED:
                 r = r - (c @ self.weights[k] + self.biases[k])
             parts.append(r)
         return np.concatenate(parts, axis=1)
 
     def transform(self, x):
         z = self._raw(np.asarray(x, dtype=np.float32))
-        if self.mode == "csr":
+        if self.mode in self.STANDARDIZED:
             z = (z - self.mean) / self.std
         return np.ascontiguousarray(z, dtype=np.float32)
 
